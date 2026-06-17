@@ -107,7 +107,7 @@ async function connectWhatsApp(sessionId = 'default') {
   if (!fs.existsSync(authPath)) fs.mkdirSync(authPath, { recursive: true });
 
   const { state, saveCreds } = await useMultiFileAuthState(authPath);
-  const version = [2, 3000, 1115400];
+  const version = [2, 3000, 1116400]; // Stable version with better compatibility
 
   const sock = makeWASocket({
     version,
@@ -118,6 +118,8 @@ async function connectWhatsApp(sessionId = 'default') {
     generateHighQualityLinkPreview: false,
     syncFullHistory: false,
     markOnlineOnConnect: false,
+    defaultQueryTimeoutMs: 60000, // 60s timeout
+    retryRequestDelayMs: 2000,
   });
 
   clients[sessionId] = sock;
@@ -170,25 +172,31 @@ async function connectWhatsApp(sessionId = 'default') {
       delete clients[sessionId];
 
       if (isLoggedOut) {
-        // Explicitly logged out — stop and mark disconnected
         reconnectAttempts[sessionId] = 0;
         await updateSessionStatus(sessionId, 'disconnected', { phone: null, name: null, qr: null });
         triggerWebhooks(sessionId, 'session.disconnected', { sessionId });
         return;
       }
 
-      // Code 408 = QR scan timeout. Count retries to avoid infinite QR loop.
+      // Stop on rate limit (405) or forbidden (403) - WhatsApp is blocking this connection
+      if (statusCode === 405 || statusCode === 403) {
+        console.log(`🛑 [${sessionId}] WhatsApp blocking connection (code ${statusCode}). Stop retrying.`);
+        await updateSessionStatus(sessionId, 'error', { phone: null, name: null, qr: null });
+        triggerWebhooks(sessionId, 'session.error', { sessionId, error: `WhatsApp blocked with code ${statusCode}` });
+        return;
+      }
+
+      // Code 408 = QR scan timeout
       if (statusCode === 408) {
         reconnectAttempts[sessionId] = (reconnectAttempts[sessionId] || 0) + 1;
         if (reconnectAttempts[sessionId] > MAX_QR_RECONNECTS) {
-          console.log(`🛑 [${sessionId}] Too many QR timeouts (${reconnectAttempts[sessionId]}). Stopping auto-reconnect. Use the UI to reconnect manually.`);
+          console.log(`🛑 [${sessionId}] Too many QR timeouts (${reconnectAttempts[sessionId]}). Stopping.`);
           reconnectAttempts[sessionId] = 0;
           await updateSessionStatus(sessionId, 'disconnected', { phone: null, name: null, qr: null });
           return;
         }
         console.log(`🔄 [${sessionId}] QR timeout (attempt ${reconnectAttempts[sessionId]}/${MAX_QR_RECONNECTS}), retrying...`);
       } else {
-        // Other error (network drop, etc.) — reset QR counter and reconnect normally
         reconnectAttempts[sessionId] = 0;
       }
 
