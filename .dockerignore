@@ -5,9 +5,7 @@ backend/uploads/
 backend/.env
 *.env
 .git
-frontend/src/
+frontend/dist/
 frontend/public/
-cpanel-deploy/
-cpanel-deploy.zip
 sql/
 *.log
