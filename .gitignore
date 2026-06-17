@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment files — NUNCA subas esto
+backend/.env
+*.env
+
+# WhatsApp session credentials — contienen tu sesión privada
+backend/whatsapp/sessions/
+
+# Uploaded files
+backend/uploads/
+
+# Frontend build — Render lo genera en build
+frontend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*~

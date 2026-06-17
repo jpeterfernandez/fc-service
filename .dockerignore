@@ -1,0 +1,13 @@
+node_modules/
+*/node_modules/
+backend/whatsapp/sessions/
+backend/uploads/
+backend/.env
+*.env
+.git
+frontend/src/
+frontend/public/
+cpanel-deploy/
+cpanel-deploy.zip
+sql/
+*.log

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: fc-server
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: HOST
+        value: 0.0.0.0
+      - key: JWT_SECRET
+        fromSecret: jwt-secret
+      - key: FRONTEND_URL
+        fromSecret: frontend-url
+      - key: SESSIONS_DIR
+        value: /tmp/whatsapp-sessions
+      - key: UPLOADS_DIR
+        value: /tmp/uploads
