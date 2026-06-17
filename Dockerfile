@@ -1,17 +1,19 @@
-# ── Stage 1: Build frontend ──────────────────────────────────────
+# Stage 1: Build frontend
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY frontend/package*.json ./frontend/
+COPY frontend/package-lock.json ./frontend/
 RUN npm ci --prefix frontend
 COPY frontend/ ./frontend/
 RUN npm run build --prefix frontend
 
-# ── Stage 2: Production runner ───────────────────────────────────
+# Stage 2: Production runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Instalar dependencias del backend sin devDependencies
 COPY backend/package*.json ./backend/
+COPY backend/package-lock.json ./backend/
 RUN npm ci --prefix backend --omit=dev
 
 # Copiar código del backend
