@@ -107,7 +107,7 @@ async function connectWhatsApp(sessionId = 'default') {
   if (!fs.existsSync(authPath)) fs.mkdirSync(authPath, { recursive: true });
 
   const { state, saveCreds } = await useMultiFileAuthState(authPath);
-  const { version } = await fetchLatestBaileysVersion();
+  const version = [2, 3000, 1115400];
 
   const sock = makeWASocket({
     version,
