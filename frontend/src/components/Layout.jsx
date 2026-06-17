@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SessionStatusBadge from './SessionStatusBadge';
+import logoUrl from '../assets/logo.png';
 import './Layout.css';
 
 const navItems = [
@@ -57,7 +58,7 @@ export default function Layout() {
         {/* Logo + toggle */}
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <img src="/logo.png" alt="Logo" style={{ width: 30, height: 30, marginLeft: 4 }} />
+            <img src={logoUrl} alt="Logo" style={{ width: 30, height: 30, marginLeft: 4 }} />
           </div>
           {desktopOpen && <span className="sidebar-title">FC Service </span>}
 

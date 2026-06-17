@@ -15,7 +15,6 @@ async function getStatus(req, res) {
     );
     const session = rows[0] || { status: 'disconnected' };
 
-    // socketState helps diagnose "shows connected but API says not connected"
     const sock = getClient('default');
     const socketState = sock?.user ? 'connected' : (sock ? 'connecting' : 'no_socket');
 
@@ -29,27 +28,22 @@ async function connect(req, res) {
   try {
     const sock = getClient('default');
 
-    // Already fully connected
     if (sock?.user) {
       return res.json({ success: true, message: 'Already connected' });
     }
 
-    // Socket exists but stuck connecting — kill it and start fresh
-    // This avoids the infinite "connecting" state
     if (sock) {
       console.log('⚠️  Stale connecting socket detected — restarting...');
       try { sock.end(new Error('restarting')); } catch {}
       _clearClient('default');
     }
 
-    // Reset DB status
     await db.execute(
       `INSERT INTO sessions (session_id, status, qr_code)
        VALUES ('default','connecting', NULL)
        ON DUPLICATE KEY UPDATE status='connecting', qr_code=NULL, updated_at=NOW()`
     );
 
-    // Start Baileys
     connectWhatsApp('default').catch(err => {
       console.error('connectWhatsApp error:', err.message);
     });
