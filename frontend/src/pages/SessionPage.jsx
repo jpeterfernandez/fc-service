@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Wifi, WifiOff, RefreshCw, Trash2, LogOut, Smartphone, AlertCircle } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, Trash2, LogOut, Smartphone, AlertCircle, Clock } from 'lucide-react';
 import api from '../lib/api';
 import { getSocket } from '../lib/socket';
 import { useToast } from '../context/ToastContext';
@@ -10,6 +10,7 @@ export default function SessionPage() {
   const [session, setSession]   = useState({});
   const [loading, setLoading]   = useState(false);
   const [sockState, setSockState] = useState('');
+  const [connectStart, setConnectStart] = useState(null);
   const pollRef = useRef(null);
 
   async function loadStatus() {
@@ -25,7 +26,10 @@ export default function SessionPage() {
     pollRef.current = setInterval(loadStatus, 4000);
 
     const socket = getSocket();
-    const handler = (data) => setSession(prev => ({ ...prev, ...data }));
+    const handler = (data) => {
+      console.log('Socket session update:', data);
+      setSession(prev => ({ ...prev, ...data }));
+    };
     socket.on('session:status', handler);
 
     return () => {
@@ -33,6 +37,12 @@ export default function SessionPage() {
       socket.off('session:status', handler);
     };
   }, []);
+
+  useEffect(() => {
+    if (session.status === 'connecting' && !connectStart) {
+      setConnectStart(Date.now());
+    }
+  }, [session.status]);
 
   async function handleConnect() {
     setLoading(true);
@@ -218,6 +228,12 @@ export default function SessionPage() {
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
               Puede tardar unos segundos
             </p>
+            {connectStart && (
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                <Clock size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                Esperando {(Math.floor((Date.now() - connectStart) / 1000))}s
+              </p>
+            )}
           </div>
         )}
 
