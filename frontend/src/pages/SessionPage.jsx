@@ -229,9 +229,15 @@ export default function SessionPage() {
               Puede tardar unos segundos
             </p>
             {connectStart && (
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+              <p style={{ fontSize: 11, color: 'var(--color-error)', marginTop: 8 }}>
                 <Clock size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                 Esperando {(Math.floor((Date.now() - connectStart) / 1000))}s
+              </p>
+            )}
+            {connectStart && Date.now() - connectStart > 90000 && (
+              <p style={{ fontSize: 12, color: 'var(--color-error)', marginTop: 12, padding: 8, border: '1px solid var(--color-error)', borderRadius: 4 }}>
+                ⚠️ WhatsApp parece estar bloqueando la conexión desde este servidor (datacenter). 
+                Para producción, usa una IP dedicada o servicio compatible como Twilio.
               </p>
             )}
           </div>

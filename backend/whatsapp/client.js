@@ -129,7 +129,11 @@ async function connectWhatsApp(sessionId = 'default') {
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-    console.log(`[connection.update] ${sessionId}: connection=${connection}, qr=${qr ? 'yes' : 'no'}, disconnect=${lastDisconnect?.error?.output?.statusCode}`);
+    console.log(`[connection.update] ${sessionId}:`, JSON.stringify({ 
+      connection, 
+      qr: qr ? 'present' : 'null', 
+      disconnectCode: lastDisconnect?.error?.output?.statusCode 
+    }));
 
     if (qr) {
       try {
@@ -139,6 +143,10 @@ async function connectWhatsApp(sessionId = 'default') {
       } catch (e) {
         console.error('QR generation error:', e.message);
       }
+    } else if (connection === 'connecting' && !clients[sessionId]._qrLogged) {
+      // Log when waiting for QR (only once per session)
+      console.log(`⏳ [${sessionId}] Esperando QR code...`);
+      clients[sessionId]._qrLogged = true;
     }
 
     if (connection === 'open') {
