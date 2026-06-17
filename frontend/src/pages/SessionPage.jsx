@@ -136,7 +136,7 @@ export default function SessionPage() {
               <span className="session-status-text">
                 {status === 'connected'  ? 'Conectado'        :
                  status === 'connecting' ? 'Conectando...'    :
-                 status === 'error'      ? 'Error de conexión' : 'Desconectado'}
+                 status === 'error'      ? 'Error de conexión (ver logs)' : 'Desconectado'}
               </span>
             </div>
 
@@ -243,7 +243,21 @@ export default function SessionPage() {
           </div>
         )}
 
-        {!isConnecting && !isConnected && (
+        {/* QR card - Error state */}
+        {status === 'error' && (
+          <div className="card qr-card qr-placeholder" style={{ borderColor: 'var(--color-error)' }}>
+            <AlertCircle size={48} style={{ color: 'var(--color-error)', marginBottom: 14 }} />
+            <p style={{ color: 'var(--color-error)' }}>
+              <strong>WhatsApp bloqueó la conexión</strong>
+            </p>
+            <p style={{ fontSize: 12, marginTop: 8 }}>
+              WhatsApp detectó conexiones sospechosas y bloqueó el acceso.<br/>
+              Espera 1-2 horas o usa otro número de WhatsApp.
+            </p>
+          </div>
+        )}
+
+        {!isConnecting && !isConnected && status !== 'error' && (
           <div className="card qr-card qr-placeholder">
             <WifiOff size={48} style={{ color: 'var(--text-muted)', marginBottom: 14 }} />
             <p>Presiona <strong>Conectar WhatsApp</strong> para generar el QR</p>
